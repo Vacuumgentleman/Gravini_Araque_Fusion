@@ -18,9 +18,6 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] 
     private List<Transform> spawnPositions = new List<Transform>();
 
-    // -------------------------------------------------------
-    // START GAME
-    // -------------------------------------------------------
     public async void StartGame(GameMode mode)
     {
         _runner = gameObject.AddComponent<NetworkRunner>();
@@ -37,9 +34,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         });
     }
 
-    // -------------------------------------------------------
     // PLAYER JOIN / LEAVE
-    // -------------------------------------------------------
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
@@ -64,9 +59,6 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         }
     }
 
-    // -------------------------------------------------------
-    // INPUT (Fusion 2 - versión que usa tu instalación)
-    // -------------------------------------------------------
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
         NetworkInputData data = new NetworkInputData();
@@ -86,10 +78,6 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         input.Set(data);
     }
 
-
-    // -------------------------------------------------------
-    // UNUSED CALLBACKS
-    // -------------------------------------------------------
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectedToServer(NetworkRunner runner) { }

@@ -43,7 +43,6 @@ public class Player : NetworkBehaviour
         _forward = transform.forward;
     }
 
-    // Spawned: sólo una implementación — reemplaza cualquier otra Spawned()
     public override void Spawned()
     {
         if (_followCamera != null)
@@ -54,7 +53,6 @@ public class Player : NetworkBehaviour
 
         Ball.RegisterPlayer(this);
 
-        // Inicializar cache de hits en spawn para evitar trigger inmediato
         _lastSeenHits = hits;
     }
 
@@ -63,7 +61,6 @@ public class Player : NetworkBehaviour
         Ball.UnregisterPlayer(this);
     }
 
-    // FixedUpdateNetwork para movimiento y spawn (input-based)
     public override void FixedUpdateNetwork()
     {
         if (GetInput(out NetworkInputData data))
@@ -93,10 +90,8 @@ public class Player : NetworkBehaviour
         }
     }
 
-    // Comprobación simple en Update() para detectar cambios en hits y reproducir feedback local
     private void Update()
     {
-        // Leer networked property 'hits' en cualquier momento está permitido
         if (_lastSeenHits != hits)
         {
             _lastSeenHits = hits;
@@ -104,10 +99,8 @@ public class Player : NetworkBehaviour
         }
     }
 
-    // Efecto visual local cuando hits cambia (todos los peers lo ejecutan porque la propiedad cambia en red)
     private void OnHitsChangedLocal()
     {
-        // Llamamos al coroutine en el GameObject (no bloquear FixedUpdateNetwork)
         StartCoroutine(FlashRedCoroutine(0.25f));
     }
 
@@ -125,7 +118,6 @@ public class Player : NetworkBehaviour
             _renderers[i].material.color = _defaultColors[i];
     }
 
-    // Método que debe llamar Ball cuando impacta (solo el host debe llamar a esto)
     public void ApplyHit()
     {
         if (Object.HasStateAuthority)
