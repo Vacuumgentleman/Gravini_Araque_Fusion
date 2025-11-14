@@ -7,23 +7,26 @@ using UnityEngine.SceneManagement;
 
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    [HideInInspector] public NetworkRunner _runner;
-    [SerializeField] private NetworkPrefabRef _playerPrefab;
+    [HideInInspector] 
+    public NetworkRunner _runner;
+
+    [SerializeField] 
+    private NetworkPrefabRef _playerPrefab;
+
     private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new Dictionary<PlayerRef, NetworkObject>();
 
-    [SerializeField] private List<Transform> spawnPositions = new List<Transform>();
+    [SerializeField] 
+    private List<Transform> spawnPositions = new List<Transform>();
 
+    // -------------------------------------------------------
+    // START GAME
+    // -------------------------------------------------------
     public async void StartGame(GameMode mode)
     {
         _runner = gameObject.AddComponent<NetworkRunner>();
         _runner.ProvideInput = true;
 
         var scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex);
-        var sceneInfo = new NetworkSceneInfo();
-        if (scene.IsValid)
-        {
-            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
-        }
 
         await _runner.StartGame(new StartGameArgs()
         {
@@ -34,41 +37,59 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         });
     }
 
+    // -------------------------------------------------------
+    // PLAYER JOIN / LEAVE
+    // -------------------------------------------------------
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
         {
             int spawnIndex = _spawnedCharacters.Count;
-            NetworkObject networkPlayerObject = runner.Spawn(_playerPrefab, spawnPositions[spawnIndex].position, Quaternion.identity, player);
+            NetworkObject networkPlayerObject = runner.Spawn(
+                _playerPrefab,
+                spawnPositions[spawnIndex].position,
+                Quaternion.identity,
+                player);
+
             _spawnedCharacters.Add(player, networkPlayerObject);
         }
     }
+
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
-        if (_spawnedCharacters.TryGetValue(player, out NetworkObject networkObject))
+        if (_spawnedCharacters.TryGetValue(player, out NetworkObject obj))
         {
-            runner.Despawn(networkObject);
+            runner.Despawn(obj);
             _spawnedCharacters.Remove(player);
         }
     }
+
+    // -------------------------------------------------------
+    // INPUT (Fusion 2 - versión que usa tu instalación)
+    // -------------------------------------------------------
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        var data = new NetworkInputData();
+        NetworkInputData data = new NetworkInputData();
 
-        if (Input.GetKey(KeyCode.W))
-            data.direction += Vector3.forward;
+        Vector3 dir = Vector3.zero;
 
-        if (Input.GetKey(KeyCode.S))
-            data.direction += Vector3.back;
+        if (Input.GetKey(KeyCode.W)) dir += Vector3.forward;
+        if (Input.GetKey(KeyCode.S)) dir += Vector3.back;
+        if (Input.GetKey(KeyCode.A)) dir += Vector3.left;
+        if (Input.GetKey(KeyCode.D)) dir += Vector3.right;
 
-        if (Input.GetKey(KeyCode.A))
-            data.direction += Vector3.left;
+        data.direction = dir.normalized;
 
-        if (Input.GetKey(KeyCode.D))
-            data.direction += Vector3.right;
+        if (Input.GetMouseButton(0))
+            data.buttons.Set(NetworkInputData.MOUSEBUTTON0, true);
 
         input.Set(data);
     }
+
+
+    // -------------------------------------------------------
+    // UNUSED CALLBACKS
+    // -------------------------------------------------------
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
     public void OnConnectedToServer(NetworkRunner runner) { }
