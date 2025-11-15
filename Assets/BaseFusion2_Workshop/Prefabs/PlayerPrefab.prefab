@@ -107,7 +107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6821384761271510467
 Transform:
   m_ObjectHideFlags: 0
@@ -251,7 +251,7 @@ Transform:
   m_GameObject: {fileID: 6436719156271043868}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -371,7 +371,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd6cf50c08748d04fa879689f8e0d7fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _prefabBall: {fileID: 0}
+  _prefabBall: {fileID: 5377016907694525870, guid: 8cbb53e14a143bb44a35576d496f10c5, type: 3}
   _ballSpawnPoint: {fileID: 6162685890966474999}
   _followCamera: {fileID: 5978414081532415662}
   _hits: 2
