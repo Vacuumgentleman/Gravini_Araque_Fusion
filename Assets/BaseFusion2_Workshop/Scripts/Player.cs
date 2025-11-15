@@ -96,10 +96,24 @@ public class Player : NetworkBehaviour
                     }
                 }
             }
+            
         }
 
         if (ColorIndex >= 0) 
             ApplyColorFromIndex(ColorIndex);
+        
+        if (Object.HasStateAuthority)
+        {
+            if (Hits >= 3)
+            {
+                Runner.SessionInfo.IsOpen = false;
+                Runner.SessionInfo.IsVisible = false;
+
+                Debug.Log($"Jugador {Object.InputAuthority} ganó la partida!");
+                Runner.Shutdown();
+            }
+        }
+
     }
 
     private void Update()
