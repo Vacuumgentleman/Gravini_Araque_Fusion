@@ -102,40 +102,19 @@
 ![Imagen de WhatsApp 2025-11-14 a las 22 28 51_e2986d4c](https://github.com/user-attachments/assets/8776107b-2c56-490d-982a-9b8a3ea2e108)
 
 
-### Gameplay
-| Arena | Shooting | Hit Flash |
-|-------|----------|-----------|
-| <img width='450' src='https://github.com/user-attachments/assets/PLACEHOLDER' /> | <img width='450' src='https://github.com/user-attachments/assets/PLACEHOLDER' /> | <img width='450' src='https://github.com/user-attachments/assets/PLACEHOLDER' /> |
-
-### Hit UI
-<img width="500" src="https://github.com/user-attachments/assets/PLACEHOLDER" />
-
 ### Match Results (Win / Lose)
 ![Imagen de WhatsApp 2025-11-14 a las 23 00 52_ae18d2d0](https://github.com/user-attachments/assets/25a64afc-d994-47d6-a0ca-bd4e58584ad3)
 
 ![Imagen de WhatsApp 2025-11-14 a las 23 01 50_7daea2df](https://github.com/user-attachments/assets/21234e2e-71b8-45ba-b7de-d2c571b2cfe5)
 
 
-### Unity Editor
-<img width="900" src="https://github.com/user-attachments/assets/PLACEHOLDER" />
-
 ---
 
 ## Videos
 
 ### Gameplay Demo
-[![Gameplay Video](https://img.youtube.com/vi/PLACEHOLDER/0.jpg)](https://youtu.be/PLACEHOLDER)
-
----
 
 
-topics:
-  - unity
-  - unity6
-  - photon-fusion
-  - multiplayer
-  - csharp
-  - realtime
-  - game-development
-  - networking
-  - prototype
+
+https://github.com/user-attachments/assets/43017515-4f82-4dad-a61f-f21b05d1fce1
+
