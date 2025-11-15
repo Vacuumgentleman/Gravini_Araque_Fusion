@@ -35,20 +35,43 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     // PLAYER JOIN / LEAVE
+    private Color[] playerColors = new Color[]
+    {
+        Color.blue,
+        Color.green,
+        Color.yellow,
+        Color.magenta,
+        Color.cyan,
+        new Color(1f, 0.5f, 0f), //Orange
+        Color.white
+    };
+
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         if (runner.IsServer)
         {
-            int spawnIndex = _spawnedCharacters.Count;
-            NetworkObject networkPlayerObject = runner.Spawn(
+            int spawnIndex = _spawnedCharacters.Count % spawnPositions.Count;
+
+            NetworkObject playerObj = runner.Spawn(
                 _playerPrefab,
                 spawnPositions[spawnIndex].position,
                 Quaternion.identity,
-                player);
+                player
+            );
 
-            _spawnedCharacters.Add(player, networkPlayerObject);
+            _spawnedCharacters.Add(player, playerObj);
+
+            var pl = playerObj.GetComponent<Player>();
+            if (pl != null)
+            {
+                byte colorIndex = (byte)( _spawnedCharacters.Count - 1 ); 
+                pl.ColorIndex = colorIndex;
+
+
+            }
         }
     }
+
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {

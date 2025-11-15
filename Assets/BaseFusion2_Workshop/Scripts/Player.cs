@@ -10,19 +10,34 @@ public class Player : NetworkBehaviour
     [SerializeField] private Transform _ballSpawnPoint;
     [SerializeField] private Camera _followCamera;
 
-    // Networked properties
-    [Networked] public int hits { get; set; }
-    [Networked] private TickTimer delay { get; set; }
+    [Header("Gameplay")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float localFireCooldown = 0.25f; 
 
-    // Local state
+    // Networked state
+    [Networked] public int Hits { get; set; }
+    [Networked] public byte ColorIndex { get; set; } 
+    [Networked] private TickTimer delay { get; set; } 
+
     private NetworkCharacterController _cc;
     private Vector3 _forward;
-
     private Renderer[] _renderers;
     private List<Color> _defaultColors = new List<Color>();
-
-    // Local cache to detect changes in the networked 'hits' property
     private int _lastSeenHits = -1;
+
+    private double _lastLocalFireTime = -9999;
+
+    private static readonly Color[] s_colorPalette = new Color[]
+    {
+        Color.blue,
+        Color.green,
+        Color.yellow,
+        Color.magenta,
+        Color.cyan,
+        new Color(1f, 0.5f, 0f), // orange
+        Color.white,
+        Color.gray
+    };
 
     private void Awake()
     {
@@ -35,7 +50,6 @@ public class Player : NetworkBehaviour
         _defaultColors.Clear();
         foreach (var r in _renderers)
         {
-            // force material instance so color changes don't affect other objects using sharedMaterial
             var mat = r.material;
             _defaultColors.Add(mat.color);
         }
@@ -48,12 +62,11 @@ public class Player : NetworkBehaviour
         if (_followCamera != null)
             _followCamera.gameObject.SetActive(Object.HasInputAuthority);
 
-        if (transform.forward != Vector3.zero)
-            _forward = transform.forward;
-
         Ball.RegisterPlayer(this);
 
-        _lastSeenHits = hits;
+        ApplyColorFromIndex(ColorIndex);
+
+        _lastSeenHits = Hits;
     }
 
     private void OnDisable()
@@ -66,42 +79,36 @@ public class Player : NetworkBehaviour
         if (GetInput(out NetworkInputData data))
         {
             data.direction.Normalize();
-            _cc.Move(5 * data.direction * Runner.DeltaTime);
+            _cc.Move(moveSpeed * data.direction * Runner.DeltaTime);
 
-            if (data.direction.sqrMagnitude > 0.0f)
+            if (data.direction.sqrMagnitude > 0f)
                 _forward = data.direction;
 
-            if (HasStateAuthority && delay.ExpiredOrNotRunning(Runner))
+            if (Object.HasInputAuthority)
             {
                 if (data.buttons.IsSet(NetworkInputData.MOUSEBUTTON0))
                 {
-                    delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
-
-                    Runner.Spawn(_prefabBall,
-                        (_ballSpawnPoint ? _ballSpawnPoint.position : transform.position),
-                        Quaternion.LookRotation(_forward),
-                        Object.InputAuthority,
-                        (runner, obj) =>
-                        {
-                            obj.GetComponent<Ball>().Init();
-                        });
+                    double now = Runner.SimulationTime;
+                    if (now - _lastLocalFireTime >= localFireCooldown)
+                    {
+                        _lastLocalFireTime = now;
+                        RPC_RequestSpawnBall();
+                    }
                 }
             }
         }
+
+        if (ColorIndex >= 0) 
+            ApplyColorFromIndex(ColorIndex);
     }
 
     private void Update()
     {
-        if (_lastSeenHits != hits)
+        if (_lastSeenHits != Hits)
         {
-            _lastSeenHits = hits;
-            OnHitsChangedLocal();
+            _lastSeenHits = Hits;
+            StartCoroutine(FlashRedCoroutine(0.25f));
         }
-    }
-
-    private void OnHitsChangedLocal()
-    {
-        StartCoroutine(FlashRedCoroutine(0.25f));
     }
 
     private IEnumerator FlashRedCoroutine(float duration)
@@ -121,6 +128,47 @@ public class Player : NetworkBehaviour
     public void ApplyHit()
     {
         if (Object.HasStateAuthority)
-            hits++;
+            Hits++;
+    }
+
+    private void ApplyColorFromIndex(byte index)
+    {
+        int i = Mathf.Clamp(index, 0, s_colorPalette.Length - 1);
+        Color target = s_colorPalette[i];
+
+        if (_renderers != null)
+        {
+            for (int r = 0; r < _renderers.Length; r++)
+                _renderers[r].material.color = target;
+        }
+
+        for (int j = 0; j < _defaultColors.Count; j++)
+            _defaultColors[j] = target;
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_RequestSpawnBall()
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        if (!delay.ExpiredOrNotRunning(Runner))
+            return;
+
+        delay = TickTimer.CreateFromSeconds(Runner, 0.5f);
+        Runner.Spawn(
+            _prefabBall,
+            (_ballSpawnPoint ? _ballSpawnPoint.position : transform.position),
+            Quaternion.LookRotation(_forward),
+            Object.InputAuthority,
+            (runner, obj) => obj.GetComponent<Ball>().Init()
+        );
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_UpdateColorIndex(byte index)
+    {
+        ColorIndex = index;
+        ApplyColorFromIndex(index);
     }
 }

@@ -374,4 +374,4 @@ MonoBehaviour:
   _prefabBall: {fileID: 5377016907694525870, guid: 8cbb53e14a143bb44a35576d496f10c5, type: 3}
   _ballSpawnPoint: {fileID: 6162685890966474999}
   _followCamera: {fileID: 5978414081532415662}
-  _hits: 2
+  _hits: 3
